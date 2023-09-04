@@ -82,12 +82,16 @@ namespace HelloRedis.Controllers
             {
                 var produtoCache = cache.GetAsync("produtos").Result;
 
+                //convert cache to object
+
                 if (!string.IsNullOrEmpty(produtoCache))
-                    return Ok(produtoCache);
+                    return Ok(JsonConvert.DeserializeObject<List<Produto>>(produtoCache));
 
                 var produtosServices = new ProdutosServices(banco);
                 var produtos = produtosServices.ListarProdutos();
-                cache.SetAsync("produtos", JsonConvert.SerializeObject(produtos)).Wait();
+                if (produtos.Any())
+                    cache.SetAsync("produtos", JsonConvert.SerializeObject(produtos)).Wait();
+
                 return Ok(produtos);
             }
             catch (Exception ex)
